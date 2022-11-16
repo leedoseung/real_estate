@@ -5,7 +5,10 @@ import com.duvis.realestate.batch.realestatetrade.common.exception.NoTradeTypeEx
 import com.duvis.realestate.batch.realestatetrade.dto.AptTradeDto;
 import com.duvis.realestate.batch.realestatetrade.dto.ResponseDto;
 import com.duvis.realestate.batch.realestatetrade.support.RealEstateAptSupport;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -20,13 +23,14 @@ import java.util.List;
 @Component
 public class OpenApiAdapter {
 
-    private final RestTemplate restTemplate;
-    private final RealEstateAptSupport support;
+    @Autowired
+    @Qualifier("restTemplateForPublicData")
+    private RestTemplate restTemplate;
 
-    public OpenApiAdapter(RestTemplate restTemplate, RealEstateAptSupport support) {
-        this.restTemplate = restTemplate;
-        this.support = support;
-    }
+    @Autowired
+    private RealEstateAptSupport support;
+
+
 
     public List<AptTradeDto> getAptTradeHistory(Long siguCode, String dealYmd, TradeType type) {
         try {

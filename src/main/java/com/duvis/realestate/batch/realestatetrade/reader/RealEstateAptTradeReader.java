@@ -16,16 +16,21 @@ import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @StepScope
-@RequiredArgsConstructor
 @Component
 public class RealEstateAptTradeReader implements ItemReader<List<AptTradeDto>> {
 
-    private final AddressSiguRepository addressSiguRepository;
-    public final OpenApiAdapter openApiAdapter;
+    private AddressSiguRepository addressSiguRepository;
+    private OpenApiAdapter openApiAdapter;
+
+    public RealEstateAptTradeReader(AddressSiguRepository addressSiguRepository, OpenApiAdapter openApiAdapter) {
+        this.addressSiguRepository = addressSiguRepository;
+        this.openApiAdapter = openApiAdapter;
+    }
 
     @Value("#{jobParameters[month]}")
     private String month;
@@ -35,11 +40,13 @@ public class RealEstateAptTradeReader implements ItemReader<List<AptTradeDto>> {
 
         log.debug("Reading the information of the next AptTrade");
 
-
         List<KoreaAddress> addressInfo = addressSiguRepository.findAll();
+        List<AptTradeDto> result = new ArrayList<>();
 
-        addressInfo.forEach( address -> openApiAdapter.getAptTradeHistory(address.getSidoCd(), month, TradeType.APT));
+        addressInfo.forEach(address -> {
+            result.addAll(openApiAdapter.getAptTradeHistory(address.getSidoCd(), month, TradeType.APT));
+        });
 
-        return
+        return result;
     }
 }

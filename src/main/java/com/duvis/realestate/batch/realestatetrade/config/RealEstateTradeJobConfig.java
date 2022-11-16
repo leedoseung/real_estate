@@ -1,6 +1,10 @@
 package com.duvis.realestate.batch.realestatetrade.config;
 
+import com.duvis.realestate.batch.realestatetrade.dto.AptTradeDto;
+import com.duvis.realestate.batch.realestatetrade.processor.RealEstateAptTradeProcessor;
 import com.duvis.realestate.batch.realestatetrade.reader.RealEstateAptTradeReader;
+import com.duvis.realestate.batch.realestatetrade.writer.RealEstateAptTradeWriter;
+import com.duvis.realestate.domain.entity.EstateRealAptTrx;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -10,10 +14,12 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @Configuration
-public class RealStateTradeJobConfig {
+public class RealEstateTradeJobConfig {
 
     private static final String Job_NAME = "realStateTradeJob";
 
@@ -23,13 +29,17 @@ public class RealStateTradeJobConfig {
 
     private final RealEstateAptTradeReader realEstateAptTradeReader;
 
+    private final RealEstateAptTradeProcessor realEstateAptTradeProcessor;
+
+    private final RealEstateAptTradeWriter realEstateAptTradeWriter;
+
 
     @Bean
     public Job realStateTradeJob(){
         return this.jobBuilderFactory.get(Job_NAME)
                 .start(realEstateAptTradeStep())
-                .next(realEstateHouseTradeStep())
-                .next(realEstateMansionTradeStep())
+                //.next(realEstateHouseTradeStep())
+                //.next(realEstateMansionTradeStep())
                 .build();
     }
 
@@ -37,14 +47,14 @@ public class RealStateTradeJobConfig {
     @JobScope
     public Step realEstateAptTradeStep() {
         return stepBuilderFactory.get("realEstateAptTradeStep")
-                .chunk(1)
+                .<List<AptTradeDto>, List<EstateRealAptTrx>>chunk(1)
                 .reader(realEstateAptTradeReader)
                 .processor(realEstateAptTradeProcessor)
                 .writer(realEstateAptTradeWriter)
                 .build();
     }
 
-    @Bean
+    /*@Bean
     @JobScope
     public Step realEstateHouseTradeStep() {
         return stepBuilderFactory.get("realEstateHouseTradeStep")
@@ -64,5 +74,5 @@ public class RealStateTradeJobConfig {
                 .processor(realEstateMansionTradeProcessor)
                 .writer(realEstateMansionTradeWriter)
                 .build();
-    }
+    }*/
 }
